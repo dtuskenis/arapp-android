@@ -1,0 +1,21 @@
+
+buildscript {
+    repositories {
+        google()
+    }
+    dependencies {
+        classpath 'com.google.ar.sceneform:plugin:1.7.0'
+    }
+}
+
+apply plugin: 'com.google.ar.sceneform.plugin'
+
+new File("${project.projectDir}/src/models").eachDir { modelDirectory ->
+    def modelName = modelDirectory.getName()
+    def modelPath = modelDirectory.path + File.separator + modelName
+
+    sceneform.asset(modelPath + ".obj",
+                    "default",
+                    modelPath + ".sfa",
+                    "build/generated_sceneform_assets/" + modelName)
+}
