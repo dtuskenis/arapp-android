@@ -2,12 +2,19 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    >
 
     <fragment
         android:name="com.google.ar.sceneform.ux.ArFragment"
         android:id="@+id/ar_fragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        />
+
+    <include
+        android:id="@+id/view_catalogue"
+        layout="@layout/view_catalogue"
+        />
 
 </FrameLayout>

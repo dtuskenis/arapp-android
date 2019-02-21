@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">AR App</string>
+
+    <string name="catalogue_title">Models</string>
 </resources>
