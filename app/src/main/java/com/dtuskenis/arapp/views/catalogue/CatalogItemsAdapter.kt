@@ -1,4 +1,4 @@
-package com.dtuskenis.arapp.catalogue
+package com.dtuskenis.arapp.views.catalogue
 
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -11,8 +11,7 @@ import com.dtuskenis.arapp.images.LazyLoadImageView
 class CatalogItemsAdapter(private val onItemSelected: Accept<CatalogueItem>): RecyclerView.Adapter<CatalogItemsAdapter.ViewHolder>() {
 
     class ViewHolder internal constructor(rootView: View,
-                                          private val onItemSelected: Accept<CatalogueItem>
-    ): RecyclerView.ViewHolder(rootView) {
+                                          private val onItemSelected: Accept<CatalogueItem>): RecyclerView.ViewHolder(rootView) {
 
         private val imageView = rootView.findViewById<LazyLoadImageView>(R.id.image_view)
 
@@ -33,14 +32,10 @@ class CatalogItemsAdapter(private val onItemSelected: Accept<CatalogueItem>): Re
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, type: Int): ViewHolder =
-        ViewHolder(
-            LayoutInflater.from(parent.context).inflate(
-                R.layout.view_catalog_item,
-                parent,
-                false
-            ),
-            onItemSelected
-        )
+            ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.view_catalog_item,
+                                                                   parent,
+                                                                   false),
+                       onItemSelected)
 
     override fun getItemCount(): Int =
             items.size

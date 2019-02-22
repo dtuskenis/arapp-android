@@ -1,11 +1,10 @@
-package com.dtuskenis.arapp.catalogue
+package com.dtuskenis.arapp.views.catalogue
 
 import com.dtuskenis.arapp.subscriptions.SubscriptionsGroup
 
 class CataloguePresenter(subscriptions: SubscriptionsGroup,
                          view: CatalogueView,
-                         model: CatalogueModel
-) {
+                         model: CatalogueModel) {
 
     init {
         subscriptions
@@ -13,7 +12,10 @@ class CataloguePresenter(subscriptions: SubscriptionsGroup,
                     model.getItems().let { view.setItems(it) }
                 }
                 .add(view.onItemSelected()) {
-                    model.logItemSelected(it)
+                    model.selectItem(it)
+                }
+                .add(model.onUnlocked()) {
+                    view.unlock()
                 }
     }
 }

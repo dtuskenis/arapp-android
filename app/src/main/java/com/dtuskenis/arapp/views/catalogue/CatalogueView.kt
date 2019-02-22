@@ -1,4 +1,4 @@
-package com.dtuskenis.arapp.catalogue
+package com.dtuskenis.arapp.views.catalogue
 
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.widget.LinearLayoutManager
@@ -17,24 +17,29 @@ import com.dtuskenis.arapp.subscriptions.publish
 class CatalogueView(rootView: View) {
 
     private val onCatalogueOpened = Publisher<Run>()
-    private val onItemSelected =
-        Publisher<Accept<CatalogueItem>>()
+    private val onItemSelected = Publisher<Accept<CatalogueItem>>()
 
-    private val itemsAdapter = CatalogItemsAdapter { onItemSelected.publish(it) }
+    private val itemsAdapter: CatalogItemsAdapter
 
     private val background = rootView.findViewById<View>(R.id.background)
     private val itemsContainer = rootView.findViewById<View>(R.id.items_container)
     private val addButton = rootView.findViewById<FloatingActionButton>(R.id.add_button)
 
     init {
-        rootView.onLaidOut { changeStateUsing(StateChange.CLOSE_NOW) }
+        rootView.onLaidOut { changeStateTo(CatalogueViewState.CLOSED, animated = false) }
 
-        background.setOnClickListener { changeStateUsing(StateChange.CLOSE_ANIMATED) }
+        background.setOnClickListener { changeStateTo(CatalogueViewState.CLOSED, animated = true) }
 
         addButton.setOnClickListener {
-            changeStateUsing(StateChange.OPEN_ANIMATED)
+            changeStateTo(CatalogueViewState.OPENED, animated = true)
 
             onCatalogueOpened.publish()
+        }
+
+        itemsAdapter = CatalogItemsAdapter {
+            changeStateTo(CatalogueViewState.LOCKED, animated = true)
+
+            onItemSelected.publish(it)
         }
 
         rootView.findViewById<RecyclerView>(R.id.recycler_view).run {
@@ -46,43 +51,35 @@ class CatalogueView(rootView: View) {
         }
     }
 
+    fun unlock() {
+        changeStateTo(CatalogueViewState.CLOSED, animated = true)
+    }
+
     fun onCatalogueOpened(): Subscribable<Run> = onCatalogueOpened
 
     fun onItemSelected(): Subscribable<Accept<CatalogueItem>> = onItemSelected
 
     fun setItems(items: List<CatalogueItem>) = itemsAdapter.setItems(items)
 
-    private enum class StateChange(val shouldBeOpened: Boolean,
-                                   val animated: Boolean) {
-        OPEN_ANIMATED   (shouldBeOpened = true,     animated = true),
-        CLOSE_ANIMATED  (shouldBeOpened = false,    animated = true),
-        OPEN_NOW        (shouldBeOpened = true,     animated = false),
-        CLOSE_NOW       (shouldBeOpened = false,    animated = false),
-    }
+    private fun changeStateTo(newState: CatalogueViewState, animated: Boolean) {
+        val catalogueShouldBeVisible = newState == CatalogueViewState.OPENED
+        val addButtonShouldBeVisible = newState == CatalogueViewState.CLOSED
 
-    private fun changeStateUsing(stateChange: StateChange) {
-        val shouldBeOpened = stateChange.shouldBeOpened
+        background.isClickable = catalogueShouldBeVisible
 
-        background.isClickable = shouldBeOpened
+        val backgroundAlpha = if (catalogueShouldBeVisible) 1F else 0F
+        val itemContainerTranslationY = if (catalogueShouldBeVisible) 0F else itemsContainer.height.toFloat()
 
-        val backgroundAlpha = if (shouldBeOpened) 1F else 0F
-        val itemContainerTranslationY = if (shouldBeOpened) 0F else itemsContainer.height.toFloat()
+        if (animated) {
+            addButton.run { if (addButtonShouldBeVisible) show() else hide() }
 
-        if (stateChange.animated) {
             background.animateDecelerated { it.alpha(backgroundAlpha) }
             itemsContainer.animateDecelerated { it.translationY(itemContainerTranslationY) }
         } else {
+            addButton.visibility = if (addButtonShouldBeVisible) View.VISIBLE else View.GONE
+
             background.alpha = backgroundAlpha
             itemsContainer.translationY = itemContainerTranslationY
-        }
-
-        addButton.run {
-            when (stateChange) {
-                StateChange.OPEN_ANIMATED -> hide()
-                StateChange.CLOSE_ANIMATED -> show()
-                StateChange.OPEN_NOW -> visibility = View.GONE
-                StateChange.CLOSE_NOW -> visibility = View.VISIBLE
-            }
         }
     }
 
@@ -93,5 +90,11 @@ class CatalogueView(rootView: View) {
                 animation(animate())
                         .setInterpolator(DecelerateInterpolator(DECELERATE_FACTOR))
                         .start()
+    }
+
+    private enum class CatalogueViewState {
+        LOCKED,
+        OPENED,
+        CLOSED,
     }
 }
