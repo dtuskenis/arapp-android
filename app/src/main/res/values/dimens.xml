@@ -4,6 +4,7 @@
     <dimen name="margin_control">16dp</dimen>
 
     <dimen name="text_size_title">24sp</dimen>
+    <dimen name="text_size_content">18sp</dimen>
 
     <dimen name="catalogue_item_image_size">150dp</dimen>
 </resources>

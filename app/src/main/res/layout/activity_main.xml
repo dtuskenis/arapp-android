@@ -15,4 +15,9 @@
         layout="@layout/view_catalogue"
         />
 
+    <include
+        android:id="@+id/view_loading"
+        layout="@layout/view_loading"
+        />
+
 </FrameLayout>

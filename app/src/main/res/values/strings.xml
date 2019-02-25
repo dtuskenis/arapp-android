@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">AR App</string>
 
-    <string name="catalogue_title">Models</string>
+    <string name="catalogue_title">Renderables</string>
+
+    <string name="renderable_controls">Renderable Controls</string>
+    <string name="renderable_controls_scale">Scale</string>
 </resources>
