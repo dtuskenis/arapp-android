@@ -4,4 +4,5 @@
     android:id="@+id/image_view"
     android:layout_width="@dimen/catalogue_item_image_size"
     android:layout_height="@dimen/catalogue_item_image_size"
+    android:padding="@dimen/catalogue_item_image_padding"
     />

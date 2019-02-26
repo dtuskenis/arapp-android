@@ -14,6 +14,7 @@ class GlideImageLoader(private val context: Context): ImageLoader {
                       target: ImageView): Cancel {
         val viewTarget =
                 glide.load(image.uri)
+                        .centerCrop()
                         .placeholder(CircularProgressDrawable(context))
                         .into(target)
 

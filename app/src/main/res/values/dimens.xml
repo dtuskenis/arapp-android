@@ -7,6 +7,7 @@
     <dimen name="text_size_content">18sp</dimen>
 
     <dimen name="catalogue_item_image_size">150dp</dimen>
+    <dimen name="catalogue_item_image_padding">2dp</dimen>
 
     <dimen name="color_seek_bar_height">4dp</dimen>
     <dimen name="color_seek_bar_thumb_height">20dp</dimen>
