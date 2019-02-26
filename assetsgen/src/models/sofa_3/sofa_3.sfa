@@ -1,0 +1,53 @@
+{
+  materials: [
+    {
+      name: 'wire_006135006',
+      parameters: [
+        {
+          baseColor: 'tela_blanca',
+        },
+        {
+          baseColorTint: [
+            0.8,
+            0.8,
+            0.8,
+            1,
+          ],
+        },
+        {
+          metallic: 1,
+        },
+        {
+          roughness: 0.242536,
+        },
+        {
+          opacity: null,
+        },
+      ],
+      source: 'build/sceneform_sdk/default_materials/obj_material.sfm',
+    },
+  ],
+  model: {
+    attributes: [
+      'Position',
+      'TexCoord',
+      'Orientation',
+    ],
+    collision: {},
+    file: 'src/models/sofa_3/sofa_3.obj',
+    name: 'sofa_3',
+    recenter: 'root',
+    scale: 0.011276,
+  },
+  samplers: [
+    {
+      file: 'src/models/sofa_3/tela_blanca.jpg',
+      name: 'tela_blanca',
+      params: {
+        usage_type: 'Data',
+      },
+      pipeline_name: 'tela_blanca.png',
+    },
+  ],
+  version: '0.54:2',
+}
