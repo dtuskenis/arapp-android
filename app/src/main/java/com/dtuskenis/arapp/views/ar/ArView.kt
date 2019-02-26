@@ -56,6 +56,7 @@ class ArView(rootView: View,
             }
         }
 
+        fittingNode.isEnabled = false
         fittingNode.setParent(sceneView.scene)
 
         controlsNode.setParent(sceneView.scene)
@@ -90,6 +91,7 @@ class ArView(rootView: View,
     fun onCommittedOrCancelled(): Subscribable<Run> = onCommittedOrCancelled
 
     private fun toFitting(model: Renderable? = null) {
+        fittingNode.isEnabled = true
         @Suppress("USELESS_ELVIS_RIGHT_IS_NULL")
         fittingNode.renderable = model?.arCoreRenderable ?: /* TODO: loading indicator renderable */null
 
@@ -97,6 +99,7 @@ class ArView(rootView: View,
     }
 
     private fun backToTracking() {
+        fittingNode.isEnabled = false
         fittingNode.renderable = null
 
         setControlsVisible(false)
