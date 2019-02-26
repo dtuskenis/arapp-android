@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     >
@@ -41,6 +42,29 @@
                 android:id="@+id/scale_seek_bar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingStart="@dimen/seek_bar_padding_start_end"
+                android:paddingEnd="@dimen/seek_bar_padding_start_end"
+                />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/margin_content"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/renderable_controls_color"
+                android:textSize="@dimen/text_size_content"
+                />
+
+            <com.rtugeek.android.colorseekbar.ColorSeekBar
+                android:id="@+id/color_seek_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:colorSeeds="@array/material_colors"
+                app:thumbHeight="@dimen/color_seek_bar_thumb_height"
+                app:barHeight="@dimen/color_seek_bar_height"
                 />
 
         </LinearLayout>

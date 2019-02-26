@@ -6,6 +6,7 @@ import android.widget.SeekBar
 import com.google.ar.sceneform.ArSceneView
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.math.Vector3
+import com.google.ar.sceneform.rendering.Color
 import com.google.ar.sceneform.rendering.ViewRenderable
 import com.dtuskenis.arapp.R
 import com.dtuskenis.arapp.extensions.*
@@ -14,6 +15,7 @@ import com.dtuskenis.arapp.views.Renderable
 import com.dtuskenis.arapp.subscriptions.Publisher
 import com.dtuskenis.arapp.subscriptions.Subscribable
 import com.dtuskenis.arapp.subscriptions.publish
+import com.rtugeek.android.colorseekbar.ColorSeekBar
 import kotlin.math.roundToInt
 
 class ArView(rootView: View,
@@ -29,8 +31,11 @@ class ArView(rootView: View,
     private val cancelButton = rootView.findViewById<FloatingActionButton>(R.id.cancel_button)
 
     private val scaleSeekBar = renderableControls.view.findViewById<SeekBar>(R.id.scale_seek_bar)
+    private val colorSeekBar = renderableControls.view.findViewById<ColorSeekBar>(R.id.color_seek_bar)
 
+    // TODO: need to compose that better
     private val renderablesScales = mutableMapOf<Node, Renderable.ScaleMultiplier>()
+    private val renderablesColors = mutableMapOf<Node, Int>()
 
     init {
         setControlsVisible(false)
@@ -133,6 +138,15 @@ class ArView(rootView: View,
 
             node.worldScale = newScale.floatValue.let { Vector3(it, it, it) }
         }
+
+        val color = renderablesColors.getOrPut(node) { android.graphics.Color.WHITE }
+
+        colorSeekBar.setOnColorChangeListener { _, _, newColor ->
+            renderablesColors[node] = newColor
+
+            node.renderable?.material?.setFloat3(MATERIAL_TINT, Color(newColor))
+        }
+        colorSeekBar.color = color
     }
 
     private fun renderableScaleToSeekBarProgress(scale: Renderable.ScaleMultiplier): Int {
@@ -148,4 +162,8 @@ class ArView(rootView: View,
                           dstRange = Renderable.ScaleMultiplier.ALLOWED_FLOAT_VALUES)
                 .let { Renderable.ScaleMultiplier(it) }
     }
+
+     companion object {
+         private const val MATERIAL_TINT = "baseColorTint"
+     }
 }
