@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewPropertyAnimator
 import android.view.animation.DecelerateInterpolator
 import com.dtuskenis.arapp.R
-import com.dtuskenis.arapp.extensions.onLaidOut
 import com.dtuskenis.arapp.functional.Accept
 import com.dtuskenis.arapp.functional.Run
 import com.dtuskenis.arapp.subscriptions.Publisher
@@ -26,7 +25,7 @@ class CatalogueView(rootView: View) {
     private val addButton = rootView.findViewById<FloatingActionButton>(R.id.add_button)
 
     init {
-        rootView.onLaidOut { changeStateTo(CatalogueViewState.CLOSED, animated = false) }
+        changeStateTo(CatalogueViewState.CLOSED, animated = false)
 
         background.setOnClickListener { changeStateTo(CatalogueViewState.CLOSED, animated = true) }
 
@@ -68,18 +67,31 @@ class CatalogueView(rootView: View) {
         background.isClickable = catalogueShouldBeVisible
 
         val backgroundAlpha = if (catalogueShouldBeVisible) 1F else 0F
-        val itemContainerTranslationY = if (catalogueShouldBeVisible) 0F else itemsContainer.height.toFloat()
+        val updateItemsContainerVisibility = { itemsContainer.setVisibleOrGoneIf(!catalogueShouldBeVisible) }
 
         if (animated) {
             addButton.run { if (addButtonShouldBeVisible) show() else hide() }
 
             background.animateDecelerated { it.alpha(backgroundAlpha) }
-            itemsContainer.animateDecelerated { it.translationY(itemContainerTranslationY) }
+
+            animateItemsContainer(catalogueShouldBeVisible, updateItemsContainerVisibility)
         } else {
             addButton.visibility = if (addButtonShouldBeVisible) View.VISIBLE else View.GONE
 
             background.alpha = backgroundAlpha
-            itemsContainer.translationY = itemContainerTranslationY
+
+            updateItemsContainerVisibility()
+        }
+    }
+
+    private fun animateItemsContainer(shouldBeOpened: Boolean, onEnd: () -> Unit) {
+        val itemContainerHeight = itemsContainer.height.toFloat()
+        val itemContainerTargetTranslationY = if (shouldBeOpened) 0F else itemContainerHeight
+
+        itemsContainer.translationY = itemContainerHeight - itemContainerTargetTranslationY
+        itemsContainer.visibility = View.VISIBLE
+        itemsContainer.animateDecelerated {
+            it.translationY(itemContainerTargetTranslationY).withEndAction { onEnd() }
         }
     }
 
@@ -90,6 +102,10 @@ class CatalogueView(rootView: View) {
                 animation(animate())
                         .setInterpolator(DecelerateInterpolator(DECELERATE_FACTOR))
                         .start()
+
+        private fun View.setVisibleOrGoneIf(condition: Boolean) {
+            visibility = if (condition) View.GONE else View.VISIBLE
+        }
     }
 
     private enum class CatalogueViewState {

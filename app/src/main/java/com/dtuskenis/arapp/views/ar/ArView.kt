@@ -41,18 +41,15 @@ class ArView(rootView: View,
         setControlsVisible(false)
 
         sceneView.run {
-            onLaidOut {
-
+            scene.addOnUpdateListener {
                 val width = width.toFloat()
                 val height = height.toFloat()
 
-                scene.addOnUpdateListener {
-                    arFrame?.hitTest(width / 2, height / 2)
-                           ?.firstOrNull()
-                           ?.hitPose
-                           ?.let { Vector3(it.tx(), it.ty(), it.tz()) }
-                           ?.let { fittingNode.worldPosition = it }
-                }
+                arFrame?.hitTest(width / 2, height / 2)
+                       ?.firstOrNull()
+                       ?.hitPose
+                       ?.let { Vector3(it.tx(), it.ty(), it.tz()) }
+                       ?.let { fittingNode.worldPosition = it }
             }
         }
 
