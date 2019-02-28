@@ -1,9 +1,9 @@
 package com.dtuskenis.arapp.views
 
+import com.dtuskenis.arapp.lifecycle.Lifecycle
 import com.dtuskenis.arapp.functional.Cancel
-import com.dtuskenis.arapp.subscriptions.SubscriptionsGroup
 
-class AppPresenter(subscriptions: SubscriptionsGroup,
+class AppPresenter(lifecycle: Lifecycle,
                    view: AppView,
                    model: AppModel) {
 
@@ -11,14 +11,15 @@ class AppPresenter(subscriptions: SubscriptionsGroup,
     private var cancelCurrentLoading: Cancel? = null
 
     init {
-        subscriptions
+        lifecycle.subscriptions
             .add(view.onRenderableRequested()) {
                 cancelCurrentLoading?.invoke()
-                // TODO: tie to lifecycle
-                cancelCurrentLoading = model.loadRenderableNamed(it.name) {
-                    cancelCurrentLoading = null
+                cancelCurrentLoading = lifecycle.launch {
+                    model.loadRenderableNamed(it.name).let {
+                        cancelCurrentLoading = null
 
-                    view.acceptRequestedRenderable(it)
+                        view.acceptRequestedRenderable(it)
+                    }
                 }
             }
             .add(view.onRenderableRequestCancelled()) {
@@ -26,7 +27,8 @@ class AppPresenter(subscriptions: SubscriptionsGroup,
                 cancelCurrentLoading = null
             }
 
-        // TODO: tie to lifecycle
-        model.loadItems { view.setCatalogueItems(it) }
+        lifecycle.launch {
+            model.loadItems().let { view.setCatalogueItems(it) }
+        }
     }
 }

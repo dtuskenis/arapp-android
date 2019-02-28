@@ -6,14 +6,15 @@ import android.view.View
 import com.google.ar.sceneform.rendering.ViewRenderable
 import com.dtuskenis.arapp.data.CatalogueItemsProvider
 import com.dtuskenis.arapp.data.RenderablesProvider
+import com.dtuskenis.arapp.lifecycle.LifecycleControl
 import com.dtuskenis.arapp.views.ar.ArView
 import com.dtuskenis.arapp.views.catalogue.CatalogueView
-import com.dtuskenis.arapp.subscriptions.SubscriptionsGroupControl
 import com.dtuskenis.arapp.views.*
+import kotlinx.coroutines.Dispatchers
 
 class MainActivity : AppCompatActivity() {
 
-    private val untilDestroyed = SubscriptionsGroupControl()
+    private val untilDestroyed = LifecycleControl(Dispatchers.Main)
 
     private val renderablesProvider: RenderablesProvider by lazy { RenderablesProvider(this, assets) }
 
@@ -24,12 +25,14 @@ class MainActivity : AppCompatActivity() {
         // TODO: implement Bootstrap MVP
         val loadingView = findViewById<View>(R.id.view_loading)
 
-        loadingView.visibility = View.VISIBLE
+        untilDestroyed.launch {
+            loadingView.visibility = View.VISIBLE
 
-        renderablesProvider.getRenderableControls { renderableControls ->
-            loadingView.visibility = View.GONE
+            renderablesProvider.loadRenderableControls().let { renderableControls ->
+                loadingView.visibility = View.GONE
 
-            showAR(renderableControls)
+                showAR(renderableControls)
+            }
         }
     }
 
@@ -49,7 +52,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        untilDestroyed.unsubscribeAll()
+        untilDestroyed.terminate()
 
         super.onDestroy()
     }
