@@ -62,7 +62,7 @@
                 android:id="@+id/color_seek_bar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:colorSeeds="@array/material_colors"
+                app:colorSeeds="@array/renderable_tint_colors"
                 app:thumbHeight="@dimen/color_seek_bar_thumb_height"
                 app:barHeight="@dimen/color_seek_bar_height"
                 />
