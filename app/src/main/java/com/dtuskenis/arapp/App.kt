@@ -4,6 +4,7 @@ import android.app.Application
 import com.dtuskenis.arapp.images.GlideImageLoader
 import com.dtuskenis.arapp.images.ImageLoader
 
+// TODO: look into removing custom app
 class App: Application() {
 
     override fun onCreate() {

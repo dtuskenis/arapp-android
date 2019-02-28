@@ -7,26 +7,29 @@ import com.google.ar.sceneform.ArSceneView
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.Color
+import com.google.ar.sceneform.rendering.Renderable
 import com.google.ar.sceneform.rendering.ViewRenderable
 import com.dtuskenis.arapp.R
 import com.dtuskenis.arapp.extensions.*
 import com.dtuskenis.arapp.functional.Run
-import com.dtuskenis.arapp.views.Renderable
 import com.dtuskenis.arapp.subscriptions.Publisher
 import com.dtuskenis.arapp.subscriptions.Subscribable
 import com.dtuskenis.arapp.subscriptions.publish
+import com.dtuskenis.arapp.data.RenderableScale
 import com.rtugeek.android.colorseekbar.ColorSeekBar
 import kotlin.math.roundToInt
 
 class ArView(rootView: View,
              renderableControls: ViewRenderable) {
 
-    private val onCommittedOrCancelled = Publisher<Run>()
+    private val onFittingModeCancelled = Publisher<Run>()
+    private val onAddButtonClickedAndHidden = Publisher<Run>()
 
     private val fittingNode = Node()
     private val controlsNode = Node()
 
     private val sceneView = rootView.findViewById<ArSceneView>(R.id.sceneform_ar_scene_view)
+    private val addButton = rootView.findViewById<FloatingActionButton>(R.id.add_button)
     private val commitButton = rootView.findViewById<FloatingActionButton>(R.id.commit_button)
     private val cancelButton = rootView.findViewById<FloatingActionButton>(R.id.cancel_button)
 
@@ -34,12 +37,10 @@ class ArView(rootView: View,
     private val colorSeekBar = renderableControls.view.findViewById<ColorSeekBar>(R.id.color_seek_bar)
 
     // TODO: need to compose that better
-    private val renderablesScales = mutableMapOf<Node, Renderable.ScaleMultiplier>()
+    private val renderablesScales = mutableMapOf<Node, RenderableScale>()
     private val renderablesColors = mutableMapOf<Node, Int>()
 
     init {
-        setControlsVisible(false)
-
         sceneView.run {
             scene.addOnUpdateListener {
                 val width = width.toFloat()
@@ -60,11 +61,17 @@ class ArView(rootView: View,
         controlsNode.renderable = renderableControls
         controlsNode.isEnabled = false
 
+        addButton.setOnClickListener {
+            addButton.hide()
+
+            onAddButtonClickedAndHidden.publish()
+        }
+
         commitButton.setOnClickListener {
             // TODO: fix this condition
             fittingNode.renderable?.let {
                 addNewNodeWith(it)
-                backToTracking()
+                switchToTrackingMode()
             }
         }
 
@@ -74,41 +81,49 @@ class ArView(rootView: View,
             true
         }
 
-        cancelButton.setOnClickListener { backToTracking() }
+        cancelButton.setOnClickListener { switchToTrackingMode() }
+
+        setControlsVisible(false)
     }
 
-    fun showLoading() {
-        toFitting()
+    fun switchToFittingModeWithLoadingIndicator() {
+        switchToFittingMode()
     }
 
-    fun showNewRenderable(renderable: Renderable) {
-        toFitting(renderable)
+    fun switchToFittingModeWithRenderable(renderable: Renderable) {
+        switchToFittingMode(renderable)
     }
 
-    fun onCommittedOrCancelled(): Subscribable<Run> = onCommittedOrCancelled
+    fun onFittingModeCancelled(): Subscribable<Run> = onFittingModeCancelled
 
-    private fun toFitting(model: Renderable? = null) {
+    fun onAddButtonClickedAndHidden(): Subscribable<Run> = onAddButtonClickedAndHidden
+
+    fun makeAddButtonVisible() {
+        addButton.show()
+    }
+
+    private fun switchToFittingMode(renderable: Renderable? = null) {
         fittingNode.isEnabled = true
         @Suppress("USELESS_ELVIS_RIGHT_IS_NULL")
-        fittingNode.renderable = model?.arCoreRenderable ?: /* TODO: loading indicator renderable */null
+        fittingNode.renderable = renderable ?: /* TODO: loading indicator renderable */null
 
         setControlsVisible(true)
     }
 
-    private fun backToTracking() {
+    private fun switchToTrackingMode() {
         fittingNode.isEnabled = false
         fittingNode.renderable = null
 
         setControlsVisible(false)
 
-        onCommittedOrCancelled.publish()
+        makeAddButtonVisible()
     }
 
     private fun setControlsVisible(visible: Boolean) {
         arrayOf(commitButton, cancelButton).forEach { if (visible) it.show() else it.hide() }
     }
 
-    private fun addNewNodeWith(renderable: com.google.ar.sceneform.rendering.Renderable) {
+    private fun addNewNodeWith(renderable: Renderable) {
         val newNode = Node()
 
         newNode.setParent(sceneView.scene)
@@ -128,7 +143,7 @@ class ArView(rootView: View,
     }
 
     private fun configureScaleSeekBarFor(node: Node) {
-        val scale = renderablesScales.getOrPut(node) { Renderable.ScaleMultiplier(1.0f) }
+        val scale = renderablesScales.getOrPut(node) { RenderableScale(1.0f) }
 
         scaleSeekBar.progress = renderableScaleToSeekBarProgress(scale)
         scaleSeekBar.setOnProgressChangedByUserListener {
@@ -149,18 +164,18 @@ class ArView(rootView: View,
         colorSeekBar.color = color
     }
 
-    private fun renderableScaleToSeekBarProgress(scale: Renderable.ScaleMultiplier): Int {
+    private fun renderableScaleToSeekBarProgress(scale: RenderableScale): Int {
         return scaleFloat(scale.floatValue,
-                          srcRange = Renderable.ScaleMultiplier.ALLOWED_FLOAT_VALUES,
+                          srcRange = RenderableScale.ALLOWED_FLOAT_VALUES,
                           dstRange = SEEK_BAR_PROGRESS_VALUES.map { it.toFloat() })
                 .roundToInt()
     }
 
-    private fun seekBarProgressToRenderableScale(progress: Int): Renderable.ScaleMultiplier {
+    private fun seekBarProgressToRenderableScale(progress: Int): RenderableScale {
         return scaleFloat(progress.toFloat(),
                           srcRange = SEEK_BAR_PROGRESS_VALUES.map { it.toFloat() },
-                          dstRange = Renderable.ScaleMultiplier.ALLOWED_FLOAT_VALUES)
-                .let { Renderable.ScaleMultiplier(it) }
+                          dstRange = RenderableScale.ALLOWED_FLOAT_VALUES)
+                .let { RenderableScale(it) }
     }
 
      companion object {

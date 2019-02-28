@@ -5,26 +5,27 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.dtuskenis.arapp.R
+import com.dtuskenis.arapp.data.RenderableInfo
 import com.dtuskenis.arapp.functional.Accept
 import com.dtuskenis.arapp.images.LazyLoadImageView
 
-class CatalogItemsAdapter(private val onItemSelected: Accept<CatalogueItem>): RecyclerView.Adapter<CatalogItemsAdapter.ViewHolder>() {
+internal class CatalogItemsAdapter(private val onItemSelected: Accept<RenderableInfo>): RecyclerView.Adapter<CatalogItemsAdapter.ViewHolder>() {
 
     class ViewHolder internal constructor(rootView: View,
-                                          private val onItemSelected: Accept<CatalogueItem>): RecyclerView.ViewHolder(rootView) {
+                                          private val onItemSelected: Accept<RenderableInfo>): RecyclerView.ViewHolder(rootView) {
 
         private val imageView = rootView.findViewById<LazyLoadImageView>(R.id.image_view)
 
-        fun update(item: CatalogueItem) {
-            imageView.setImage(item.image)
+        fun update(item: RenderableInfo) {
+            imageView.setImage(item.previewImage)
 
             itemView.setOnClickListener { onItemSelected(item) }
         }
     }
 
-    private val items = mutableListOf<CatalogueItem>()
+    private val items = mutableListOf<RenderableInfo>()
 
-    fun setItems(newItems: List<CatalogueItem>) {
+    fun setItems(newItems: List<RenderableInfo>) {
         items.clear()
         items.addAll(newItems)
 

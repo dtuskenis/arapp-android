@@ -4,15 +4,12 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import com.google.ar.sceneform.rendering.ViewRenderable
-import com.dtuskenis.arapp.views.ar.ArModel
-import com.dtuskenis.arapp.views.ar.ArPresenter
+import com.dtuskenis.arapp.data.CatalogueItemsProvider
+import com.dtuskenis.arapp.data.RenderablesProvider
 import com.dtuskenis.arapp.views.ar.ArView
-import com.dtuskenis.arapp.views.catalogue.CatalogueModel
-import com.dtuskenis.arapp.views.catalogue.CataloguePresenter
 import com.dtuskenis.arapp.views.catalogue.CatalogueView
-import com.dtuskenis.arapp.views.Coordinator
 import com.dtuskenis.arapp.subscriptions.SubscriptionsGroupControl
-import com.dtuskenis.arapp.views.RenderablesProvider
+import com.dtuskenis.arapp.views.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,17 +34,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showAR(renderableControls: ViewRenderable) {
-        val coordinator = Coordinator(renderablesProvider)
+        AppPresenter(untilDestroyed,
 
-        CataloguePresenter(untilDestroyed,
-                           view = CatalogueView(findViewById(R.id.view_catalogue)),
-                           model = CatalogueModel(assets,
-                                                  coordinator))
+                     view = AppView(untilDestroyed,
 
-        ArPresenter(untilDestroyed,
-                    view = ArView(findViewById(R.id.view_ar),
-                                  renderableControls),
-                    model = ArModel(coordinator))
+                                    arView = ArView(findViewById(R.id.view_ar),
+                                                    renderableControls),
+
+                                    catalogueView = CatalogueView(findViewById(R.id.view_catalogue))),
+
+                     model = AppModel(catalogueItemsProvider = CatalogueItemsProvider(assets),
+
+                                      renderablesProvider = renderablesProvider))
     }
 
     override fun onDestroy() {

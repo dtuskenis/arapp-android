@@ -1,12 +1,12 @@
 package com.dtuskenis.arapp.views.catalogue
 
-import android.support.design.widget.FloatingActionButton
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewPropertyAnimator
 import android.view.animation.DecelerateInterpolator
 import com.dtuskenis.arapp.R
+import com.dtuskenis.arapp.data.RenderableInfo
 import com.dtuskenis.arapp.functional.Accept
 import com.dtuskenis.arapp.functional.Run
 import com.dtuskenis.arapp.subscriptions.Publisher
@@ -15,28 +15,23 @@ import com.dtuskenis.arapp.subscriptions.publish
 
 class CatalogueView(rootView: View) {
 
-    private val onCatalogueOpened = Publisher<Run>()
-    private val onItemSelected = Publisher<Accept<CatalogueItem>>()
+    private val onItemSelected = Publisher<Accept<RenderableInfo>>()
+    private val onDismissed = Publisher<Run>()
 
     private val itemsAdapter: CatalogItemsAdapter
 
     private val background = rootView.findViewById<View>(R.id.background)
     private val itemsContainer = rootView.findViewById<View>(R.id.items_container)
-    private val addButton = rootView.findViewById<FloatingActionButton>(R.id.add_button)
 
     init {
-        changeStateTo(CatalogueViewState.CLOSED, animated = false)
+        background.setOnClickListener {
+            updateState(isOpened = false, animated = true)
 
-        background.setOnClickListener { changeStateTo(CatalogueViewState.CLOSED, animated = true) }
-
-        addButton.setOnClickListener {
-            changeStateTo(CatalogueViewState.OPENED, animated = true)
-
-            onCatalogueOpened.publish()
+            onDismissed.publish()
         }
 
         itemsAdapter = CatalogItemsAdapter {
-            changeStateTo(CatalogueViewState.LOCKED, animated = true)
+            updateState(isOpened = false, animated = true)
 
             onItemSelected.publish(it)
         }
@@ -48,36 +43,31 @@ class CatalogueView(rootView: View) {
 
             adapter = itemsAdapter
         }
+
+        updateState(isOpened = false, animated = false)
     }
 
-    fun unlock() {
-        changeStateTo(CatalogueViewState.CLOSED, animated = true)
+    fun showUp() {
+        updateState(isOpened = true, animated = true)
     }
 
-    fun onCatalogueOpened(): Subscribable<Run> = onCatalogueOpened
+    fun onItemSelected(): Subscribable<Accept<RenderableInfo>> = onItemSelected
 
-    fun onItemSelected(): Subscribable<Accept<CatalogueItem>> = onItemSelected
+    fun onDismissed(): Subscribable<Run> = onDismissed
 
-    fun setItems(items: List<CatalogueItem>) = itemsAdapter.setItems(items)
+    fun setItems(items: List<RenderableInfo>) = itemsAdapter.setItems(items)
 
-    private fun changeStateTo(newState: CatalogueViewState, animated: Boolean) {
-        val catalogueShouldBeVisible = newState == CatalogueViewState.OPENED
-        val addButtonShouldBeVisible = newState == CatalogueViewState.CLOSED
+    private fun updateState(isOpened: Boolean, animated: Boolean) {
+        background.isClickable = isOpened
 
-        background.isClickable = catalogueShouldBeVisible
-
-        val backgroundAlpha = if (catalogueShouldBeVisible) 1F else 0F
-        val updateItemsContainerVisibility = { itemsContainer.setVisibleOrGoneIf(!catalogueShouldBeVisible) }
+        val backgroundAlpha = if (isOpened) 1F else 0F
+        val updateItemsContainerVisibility = { itemsContainer.setVisibleOrGoneIf(!isOpened) }
 
         if (animated) {
-            addButton.run { if (addButtonShouldBeVisible) show() else hide() }
-
             background.animateDecelerated { it.alpha(backgroundAlpha) }
 
-            animateItemsContainer(catalogueShouldBeVisible, updateItemsContainerVisibility)
+            animateItemsContainer(isOpened, updateItemsContainerVisibility)
         } else {
-            addButton.visibility = if (addButtonShouldBeVisible) View.VISIBLE else View.GONE
-
             background.alpha = backgroundAlpha
 
             updateItemsContainerVisibility()
@@ -106,11 +96,5 @@ class CatalogueView(rootView: View) {
         private fun View.setVisibleOrGoneIf(condition: Boolean) {
             visibility = if (condition) View.GONE else View.VISIBLE
         }
-    }
-
-    private enum class CatalogueViewState {
-        LOCKED,
-        OPENED,
-        CLOSED,
     }
 }
