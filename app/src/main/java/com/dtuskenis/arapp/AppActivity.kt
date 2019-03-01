@@ -12,7 +12,7 @@ import com.dtuskenis.arapp.views.catalogue.CatalogueView
 import com.dtuskenis.arapp.views.*
 import kotlinx.coroutines.Dispatchers
 
-class MainActivity : AppCompatActivity() {
+class AppActivity : AppCompatActivity() {
 
     private val untilDestroyed = LifecycleControl(Dispatchers.Main)
 
