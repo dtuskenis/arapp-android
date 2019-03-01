@@ -58,7 +58,11 @@ class ArView(rootView: View,
             true
         }
 
-        cancelButton.setOnClickListener { switchToTrackingMode() }
+        cancelButton.setOnClickListener {
+            switchToTrackingMode()
+
+            onFittingModeCancelled.publish()
+        }
 
         setControlsVisible(false)
     }
