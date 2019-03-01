@@ -19,43 +19,31 @@ class ArView(rootView: View,
     private val onFittingModeCancelled = Publisher<Run>()
     private val onAddButtonClickedAndHidden = Publisher<Run>()
 
-    private val fittingNode = Node()
-
     private val sceneView = rootView.findViewById<ArSceneView>(R.id.sceneform_ar_scene_view)
     private val addButton = rootView.findViewById<FloatingActionButton>(R.id.add_button)
     private val commitButton = rootView.findViewById<FloatingActionButton>(R.id.commit_button)
     private val cancelButton = rootView.findViewById<FloatingActionButton>(R.id.cancel_button)
 
-    private val nodeControls = NodeControls(sceneView.scene,
+    private val arScene = sceneView.scene
+
+    private val fittingNode = Node().apply { setParent(arScene) }
+
+    private val nodeControls = NodeControls(arScene,
                                             renderableControls)
 
     init {
-        sceneView.run {
-            scene.addOnUpdateListener {
-                val width = width.toFloat()
-                val height = height.toFloat()
-
-                arFrame?.hitTest(width / 2, height / 2)
-                       ?.firstOrNull()
-                       ?.hitPose
-                       ?.let { Vector3(it.tx(), it.ty(), it.tz()) }
-                       ?.let { fittingNode.worldPosition = it }
+        arScene.apply {
+            addOnUpdateListener {
+                fittingNode.takeIf { it.isEnabled }
+                          ?.let { moveNodeToCenterOfCameraView(it) }
             }
+            setOnTouchListener { _, _ ->  nodeControls.hide(); true}
         }
-
-        fittingNode.isEnabled = false
-        fittingNode.setParent(sceneView.scene)
 
         addButton.setOnClickListener {
             addButton.hide()
 
             onAddButtonClickedAndHidden.publish()
-        }
-
-        sceneView.scene.setOnTouchListener { _, _ ->
-            nodeControls.hide()
-
-            true
         }
 
         cancelButton.setOnClickListener {
@@ -64,7 +52,7 @@ class ArView(rootView: View,
             onFittingModeCancelled.publish()
         }
 
-        setControlsVisible(false)
+        switchToTrackingMode()
     }
 
     fun switchToFittingModeWithLoadingIndicator() {
@@ -85,17 +73,10 @@ class ArView(rootView: View,
 
     private fun switchToFittingMode(renderable: Renderable? = null) {
         fittingNode.isEnabled = true
-        @Suppress("USELESS_ELVIS_RIGHT_IS_NULL")
-        fittingNode.renderable = renderable ?: /* TODO: loading indicator renderable */null
+        fittingNode.renderable = renderable // TODO: loading indicator renderable
 
-        renderable?.let { fittingRenderable ->
-            commitButton.setOnClickListener {
-                addNewNodeWith(fittingRenderable)
-                switchToTrackingMode()
-            }
-        }
-
-        setControlsVisible(true)
+        commitButton.setOnClickListener { renderable?.let { onCommittedNewNodeWith(it) } }
+        forCommitAndCancelButton { it.show() }
     }
 
     private fun switchToTrackingMode() {
@@ -103,21 +84,39 @@ class ArView(rootView: View,
         fittingNode.renderable = null
 
         commitButton.setOnClickListener(null)
-        setControlsVisible(false)
+        forCommitAndCancelButton { it.hide() }
 
         makeAddButtonVisible()
     }
 
-    private fun setControlsVisible(visible: Boolean) {
-        arrayOf(commitButton, cancelButton).forEach { if (visible) it.show() else it.hide() }
+    private fun forCommitAndCancelButton(action: (FloatingActionButton) -> Unit) {
+        arrayOf(commitButton, cancelButton).forEach { action(it) }
+    }
+
+    private fun onCommittedNewNodeWith(renderable: Renderable) {
+        addNewNodeWith(renderable)
+        switchToTrackingMode()
     }
 
     private fun addNewNodeWith(renderable: Renderable) {
         val newNode = Node()
 
-        newNode.setParent(sceneView.scene)
+        newNode.setParent(arScene)
         newNode.renderable = renderable
         newNode.worldPosition = fittingNode.worldPosition
         newNode.setOnTapListener { _, _ -> nodeControls.showOn(newNode) }
+    }
+
+    private fun moveNodeToCenterOfCameraView(node: Node) {
+        sceneView.apply {
+            val width = width.toFloat()
+            val height = height.toFloat()
+
+            arFrame?.hitTest(width / 2, height / 2)
+                   ?.firstOrNull()
+                   ?.hitPose
+                   ?.let { Vector3(it.tx(), it.ty(), it.tz()) }
+                   ?.let { node.worldPosition = it }
+        }
     }
 }
