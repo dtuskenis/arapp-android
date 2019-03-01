@@ -52,14 +52,6 @@ class ArView(rootView: View,
             onAddButtonClickedAndHidden.publish()
         }
 
-        commitButton.setOnClickListener {
-            // TODO: fix this condition
-            fittingNode.renderable?.let {
-                addNewNodeWith(it)
-                switchToTrackingMode()
-            }
-        }
-
         sceneView.scene.setOnTouchListener { _, _ ->
             nodeControls.hide()
 
@@ -92,6 +84,13 @@ class ArView(rootView: View,
         @Suppress("USELESS_ELVIS_RIGHT_IS_NULL")
         fittingNode.renderable = renderable ?: /* TODO: loading indicator renderable */null
 
+        renderable?.let { fittingRenderable ->
+            commitButton.setOnClickListener {
+                addNewNodeWith(fittingRenderable)
+                switchToTrackingMode()
+            }
+        }
+
         setControlsVisible(true)
     }
 
@@ -99,6 +98,7 @@ class ArView(rootView: View,
         fittingNode.isEnabled = false
         fittingNode.renderable = null
 
+        commitButton.setOnClickListener(null)
         setControlsVisible(false)
 
         makeAddButtonVisible()
