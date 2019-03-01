@@ -1,5 +1,6 @@
 package com.dtuskenis.arapp.views.catalogue
 
+import android.support.design.widget.FloatingActionButton
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.View
@@ -8,7 +9,6 @@ import android.view.animation.DecelerateInterpolator
 import com.dtuskenis.arapp.R
 import com.dtuskenis.arapp.data.RenderableInfo
 import com.dtuskenis.arapp.functional.Accept
-import com.dtuskenis.arapp.functional.Run
 import com.dtuskenis.arapp.subscriptions.Publisher
 import com.dtuskenis.arapp.subscriptions.Subscribable
 import com.dtuskenis.arapp.subscriptions.publish
@@ -16,18 +16,24 @@ import com.dtuskenis.arapp.subscriptions.publish
 class CatalogueView(rootView: View) {
 
     private val onItemSelected = Publisher<Accept<RenderableInfo>>()
-    private val onDismissed = Publisher<Run>()
 
     private val itemsAdapter: CatalogItemsAdapter
 
+    private val addButton = rootView.findViewById<FloatingActionButton>(R.id.add_button)
     private val background = rootView.findViewById<View>(R.id.background)
     private val itemsContainer = rootView.findViewById<View>(R.id.items_container)
 
     init {
-        background.setOnClickListener {
-            updateState(isOpened = false, animated = true)
+        addButton.setOnClickListener {
+            addButton.hide()
 
-            onDismissed.publish()
+            updateState(isOpened = true, animated = true)
+        }
+
+        background.setOnClickListener {
+            allowSelecting()
+
+            updateState(isOpened = false, animated = true)
         }
 
         itemsAdapter = CatalogItemsAdapter {
@@ -47,13 +53,11 @@ class CatalogueView(rootView: View) {
         updateState(isOpened = false, animated = false)
     }
 
-    fun showUp() {
-        updateState(isOpened = true, animated = true)
+    fun allowSelecting() {
+        addButton.show()
     }
 
     fun onItemSelected(): Subscribable<Accept<RenderableInfo>> = onItemSelected
-
-    fun onDismissed(): Subscribable<Run> = onDismissed
 
     fun setItems(items: List<RenderableInfo>) = itemsAdapter.setItems(items)
 

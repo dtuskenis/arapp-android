@@ -16,13 +16,11 @@ class AppPresenter(lifecycle: Lifecycle,
                 cancelCurrentLoading?.invoke()
                 cancelCurrentLoading = lifecycle.launch {
                     model.loadRenderableNamed(it.name).let {
-                        cancelCurrentLoading = null
-
                         view.acceptRequestedRenderable(it)
                     }
                 }
             }
-            .add(view.onRenderableRequestCancelled()) {
+            .add(view.onSwitchedToTrackingMode()) {
                 cancelCurrentLoading?.invoke()
                 cancelCurrentLoading = null
             }

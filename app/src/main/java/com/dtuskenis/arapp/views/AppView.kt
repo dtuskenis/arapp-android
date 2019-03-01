@@ -24,11 +24,8 @@ class AppView(lifecycle: Lifecycle,
 
                     onRenderableRequested.publish(it)
                 }
-                .add(catalogueView.onDismissed()) {
-                    arView.makeAddButtonVisible()
-                }
-                .add(arView.onAddButtonClickedAndHidden()) {
-                    catalogueView.showUp()
+                .add(arView.onSwitchedToTrackingMode()) {
+                    catalogueView.allowSelecting()
                 }
     }
 
@@ -38,7 +35,7 @@ class AppView(lifecycle: Lifecycle,
 
     fun onRenderableRequested(): Subscribable<Accept<RenderableInfo>> = onRenderableRequested
 
-    fun onRenderableRequestCancelled(): Subscribable<Run> = arView.onFittingModeCancelled()
+    fun onSwitchedToTrackingMode(): Subscribable<Run> = arView.onSwitchedToTrackingMode()
 
     fun acceptRequestedRenderable(renderable: Renderable) {
         arView.switchToFittingModeWithRenderable(renderable)

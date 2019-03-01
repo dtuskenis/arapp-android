@@ -16,11 +16,9 @@ import com.dtuskenis.arapp.subscriptions.publish
 class ArView(rootView: View,
              renderableControls: ViewRenderable) {
 
-    private val onFittingModeCancelled = Publisher<Run>()
-    private val onAddButtonClickedAndHidden = Publisher<Run>()
+    private val onSwitchedToTrackingMode = Publisher<Run>()
 
     private val sceneView = rootView.findViewById<ArSceneView>(R.id.sceneform_ar_scene_view)
-    private val addButton = rootView.findViewById<FloatingActionButton>(R.id.add_button)
     private val commitButton = rootView.findViewById<FloatingActionButton>(R.id.commit_button)
     private val cancelButton = rootView.findViewById<FloatingActionButton>(R.id.cancel_button)
 
@@ -40,17 +38,7 @@ class ArView(rootView: View,
             setOnTouchListener { _, _ ->  nodeControls.hide(); true}
         }
 
-        addButton.setOnClickListener {
-            addButton.hide()
-
-            onAddButtonClickedAndHidden.publish()
-        }
-
-        cancelButton.setOnClickListener {
-            switchToTrackingMode()
-
-            onFittingModeCancelled.publish()
-        }
+        cancelButton.setOnClickListener { switchToTrackingMode() }
 
         switchToTrackingMode()
     }
@@ -63,13 +51,7 @@ class ArView(rootView: View,
         switchToFittingMode(renderable)
     }
 
-    fun onFittingModeCancelled(): Subscribable<Run> = onFittingModeCancelled
-
-    fun onAddButtonClickedAndHidden(): Subscribable<Run> = onAddButtonClickedAndHidden
-
-    fun makeAddButtonVisible() {
-        addButton.show()
-    }
+    fun onSwitchedToTrackingMode(): Subscribable<Run> = onSwitchedToTrackingMode
 
     private fun switchToFittingMode(renderable: Renderable? = null) {
         fittingNode.isEnabled = true
@@ -86,7 +68,7 @@ class ArView(rootView: View,
         commitButton.setOnClickListener(null)
         forCommitAndCancelButton { it.hide() }
 
-        makeAddButtonVisible()
+        onSwitchedToTrackingMode.publish()
     }
 
     private fun forCommitAndCancelButton(action: (FloatingActionButton) -> Unit) {
