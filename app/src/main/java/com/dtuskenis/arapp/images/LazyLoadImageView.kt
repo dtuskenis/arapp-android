@@ -4,14 +4,14 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.ImageView
 import com.dtuskenis.arapp.App
-import com.dtuskenis.arapp.functional.Cancel
+import com.dtuskenis.arapp.functional.CancellableTracker
 
 class LazyLoadImageView: ImageView {
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
     private var currentImage: Image? = null
-    private var cancelRequest: Cancel? = null
+    private val currentLoading = CancellableTracker()
 
     fun setImage(image: Image) {
         clear()
@@ -36,12 +36,16 @@ class LazyLoadImageView: ImageView {
     }
 
     private fun loadCurrentImageIfAny() {
-        currentImage?.let { cancelRequest = imageLoader.load(it, this) }
+        currentImage?.let { load(it) }
+    }
+
+    private fun load(image: Image) {
+        imageLoader.load(image, this)
+                   .also { currentLoading.replace(it) }
     }
 
     private fun clear() {
-        cancelRequest?.invoke()
-        cancelRequest = null
+        currentLoading.clear()
 
         setImageBitmap(null)
     }

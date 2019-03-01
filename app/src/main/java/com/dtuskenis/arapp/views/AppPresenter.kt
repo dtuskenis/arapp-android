@@ -1,28 +1,25 @@
 package com.dtuskenis.arapp.views
 
 import com.dtuskenis.arapp.lifecycle.Lifecycle
-import com.dtuskenis.arapp.functional.Cancel
+import com.dtuskenis.arapp.functional.CancellableTracker
 
 class AppPresenter(lifecycle: Lifecycle,
                    view: AppView,
                    model: AppModel) {
 
-    // TODO: need a slot or something
-    private var cancelCurrentLoading: Cancel? = null
+    private val currentLoading = CancellableTracker()
 
     init {
         lifecycle.subscriptions
             .add(view.onRenderableRequested()) {
-                cancelCurrentLoading?.invoke()
-                cancelCurrentLoading = lifecycle.launch {
+                lifecycle.launch {
                     model.loadRenderableNamed(it.name).let {
                         view.acceptRequestedRenderable(it)
                     }
-                }
+                }.also { currentLoading.replace(it) }
             }
             .add(view.onSwitchedToTrackingMode()) {
-                cancelCurrentLoading?.invoke()
-                cancelCurrentLoading = null
+                currentLoading.clear()
             }
 
         lifecycle.launch {
