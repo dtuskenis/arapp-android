@@ -13,7 +13,7 @@ class RenderablesProvider(private val context: Context,
 
     suspend fun loadRenderableNamed(name: String): Renderable =
         ModelRenderable.builder()
-            .setSource(context) { assetsManager.open("models/${name}/renderable.sfb") }
+            .setSource(context) { assetsManager.open("models/$name/renderable.sfb") }
             .build()
             .await()
 

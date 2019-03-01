@@ -44,8 +44,8 @@ internal class NodeControls(parent: NodeParent,
         val currentParams = currentParamsOf(node)
 
         scaleSeekBar.progress = renderableScaleToSeekBarProgress(currentParams.scale)
-        scaleSeekBar.setOnProgressChangedByUserListener {
-            val newScale = seekBarProgressToRenderableScale(it)
+        scaleSeekBar.setOnProgressChangedByUserListener { progress ->
+            val newScale = seekBarProgressToRenderableScale(progress)
 
             nodeParams[node] = currentParamsOf(node).copy(scale = newScale)
 
