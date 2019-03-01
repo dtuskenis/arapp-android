@@ -9,7 +9,7 @@ class LazyLoadImageView: ImageView {
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
-    private val imageLoader: ImageLoader = GlideImageLoader(context)
+    private val imageLoader = ImageLoader(context)
 
     private var currentImage: Image? = null
     private val currentLoading = CancellableTracker()
