@@ -3,12 +3,13 @@ package com.dtuskenis.arapp.images
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.ImageView
-import com.dtuskenis.arapp.App
 import com.dtuskenis.arapp.functional.CancellableTracker
 
 class LazyLoadImageView: ImageView {
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
+
+    private val imageLoader: ImageLoader = GlideImageLoader(context)
 
     private var currentImage: Image? = null
     private val currentLoading = CancellableTracker()
@@ -48,9 +49,5 @@ class LazyLoadImageView: ImageView {
         currentLoading.clear()
 
         setImageBitmap(null)
-    }
-
-    companion object {
-        private val imageLoader = App.getServices().imageLoader
     }
 }
