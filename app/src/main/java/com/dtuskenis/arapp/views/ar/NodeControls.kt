@@ -66,6 +66,7 @@ internal class NodeControls(parent: NodeParent,
         val collisionBoxSize = (node.renderable?.collisionShape?.let { it as? Box })?.size ?: Vector3.zero()
         controlsNode.worldPosition =
             node.worldPosition.apply { y += (collisionBoxSize.y * node.worldScale.y) }
+        controlsNode.worldRotation = node.worldRotation
     }
 
     private fun currentParamsOf(node: Node): NodeParams {

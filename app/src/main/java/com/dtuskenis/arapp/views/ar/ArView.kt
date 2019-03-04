@@ -24,7 +24,10 @@ class ArView(rootView: View,
 
     private val arScene = sceneView.scene
 
-    private val fittingNode = Node().apply { setParent(arScene) }
+    private val fittingNode = Node().apply {
+        setParent(arScene)
+        NodeRotationController(this)
+    }
 
     private val nodeControls = NodeControls(arScene,
                                             renderableControls)
@@ -86,6 +89,7 @@ class ArView(rootView: View,
         newNode.setParent(arScene)
         newNode.renderable = renderable
         newNode.worldPosition = fittingNode.worldPosition
+        newNode.worldRotation = fittingNode.worldRotation
         newNode.setOnTapListener { _, _ -> nodeControls.showOn(newNode) }
     }
 
