@@ -3,6 +3,7 @@ package com.dtuskenis.arapp
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import com.google.ar.sceneform.rendering.Renderable
 import com.google.ar.sceneform.rendering.ViewRenderable
 import com.dtuskenis.arapp.data.CatalogueItemsProvider
 import com.dtuskenis.arapp.data.RenderablesProvider
@@ -28,21 +29,25 @@ class AppActivity : AppCompatActivity() {
         untilDestroyed.launch {
             loadingView.visibility = View.VISIBLE
 
-            renderablesProvider.loadRenderableControls().let { renderableControls ->
-                loadingView.visibility = View.GONE
+            val renderableControls = renderablesProvider.loadRenderableControls()
+            val renderableLoadingIndicator = renderablesProvider.loadRenderableLoadingIndicator()
 
-                showAR(renderableControls)
-            }
+            showAR(renderableControls,
+                   renderableLoadingIndicator)
+
+            loadingView.visibility = View.GONE
         }
     }
 
-    private fun showAR(renderableControls: ViewRenderable) {
+    private fun showAR(renderableControls: ViewRenderable,
+                       renderableLoadingIndicator: Renderable) {
         AppPresenter(untilDestroyed,
 
                      view = AppView(untilDestroyed,
 
                                     arView = ArView(findViewById(R.id.view_ar),
-                                                    renderableControls),
+                                                    renderableControls,
+                                                    renderableLoadingIndicator),
 
                                     catalogueView = CatalogueView(findViewById(R.id.view_catalogue))),
 

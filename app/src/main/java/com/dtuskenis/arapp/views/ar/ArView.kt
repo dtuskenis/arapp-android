@@ -14,7 +14,8 @@ import com.dtuskenis.arapp.subscriptions.Subscribable
 import com.dtuskenis.arapp.subscriptions.publish
 
 class ArView(rootView: View,
-             renderableControls: ViewRenderable) {
+             renderableControls: ViewRenderable,
+             private val renderableLoadingIndicator: Renderable) {
 
     private val onSwitchedToTrackingMode = Publisher<Run>()
 
@@ -33,6 +34,8 @@ class ArView(rootView: View,
                                             renderableControls)
 
     init {
+        renderableLoadingIndicator.isShadowCaster = false
+
         arScene.apply {
             addOnUpdateListener {
                 fittingNode.takeIf { it.isEnabled }
@@ -58,7 +61,7 @@ class ArView(rootView: View,
 
     private fun switchToFittingMode(renderable: Renderable? = null) {
         fittingNode.isEnabled = true
-        fittingNode.renderable = renderable // TODO: loading indicator renderable
+        fittingNode.renderable = renderable ?: renderableLoadingIndicator
 
         commitButton.setOnClickListener { renderable?.let { onCommittedNewNodeWith(it) } }
         forCommitAndCancelButton { it.show() }
