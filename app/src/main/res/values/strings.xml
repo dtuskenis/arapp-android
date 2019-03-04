@@ -6,4 +6,5 @@
     <string name="renderable_controls">Renderable Controls</string>
     <string name="renderable_controls_scale">Scale</string>
     <string name="renderable_controls_color">Color</string>
+    <string name="renderable_controls_remove">Remove</string>
 </resources>

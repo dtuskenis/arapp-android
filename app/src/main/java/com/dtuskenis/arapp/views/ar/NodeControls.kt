@@ -1,5 +1,6 @@
 package com.dtuskenis.arapp.views.ar
 
+import android.view.View
 import android.widget.SeekBar
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.NodeParent
@@ -21,6 +22,7 @@ internal class NodeControls(parent: NodeParent,
 
     private val scaleSeekBar = renderableControls.view.findViewById<SeekBar>(R.id.scale_seek_bar)
     private val colorSeekBar = renderableControls.view.findViewById<ColorSeekBar>(R.id.color_seek_bar)
+    private val removeButton = renderableControls.view.findViewById<View>(R.id.remove_button)
 
     private val nodeParams = mutableMapOf<Node, NodeParams>()
 
@@ -59,6 +61,14 @@ internal class NodeControls(parent: NodeParent,
             nodeParams[node] = currentParamsOf(node).copy(tintColor = newColor)
 
             node.renderable?.material?.setFloat3(MATERIAL_TINT, Color(newColor))
+        }
+
+        removeButton.setOnClickListener {
+            hide()
+
+            nodeParams.remove(node)
+            node.renderable = null
+            node.parent?.removeChild(node)
         }
     }
 
